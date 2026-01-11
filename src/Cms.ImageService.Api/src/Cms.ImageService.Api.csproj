@@ -21,8 +21,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Application\src\Cms.ImageService.Application.csproj" />
-    <ProjectReference Include="..\..\Domain\src\Cms.ImageService.Domain.csproj" />
+    <ProjectReference Include="..\..\Cms.ImageService.Application\src\Cms.ImageService.Application.csproj" />
+    <ProjectReference Include="..\..\Cms.ImageService.Domain\src\Cms.ImageService.Domain.csproj" />
   </ItemGroup>
 
 </Project>
