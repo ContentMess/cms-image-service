@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Cms.ImageService.Application.Contracts;
-using Cms.ImageService.Application.Services.Interfaces;
+using Cms.ImageService.Application.CommandHandlers.Interfaces;
+using Cms.ImageService.Application.Contracts.Commands;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,7 +9,7 @@ namespace Cms.ImageService.Api.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class ImageController(IImageService imageService) : ControllerBase
+public class ImageController(IImageUploadCommandHandler imageUploadCommandHandler) : ControllerBase
 {
     [HttpPost]
     [Route("Upload")]
@@ -20,9 +20,9 @@ public class ImageController(IImageService imageService) : ControllerBase
     {
         using var fileStream = file.OpenReadStream();
 
-        var request = new ImageUploadRequest(fileStream, file.FileName);
+        var request = new ImageUploadCommand(fileStream, file.FileName);
 
-        var response = await imageService.UploadAsync(request, cancellationToken);
+        var response = await imageUploadCommandHandler.HandleAsync(request, cancellationToken);
 
         return Ok(response);
     }

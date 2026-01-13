@@ -1,44 +1,24 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using OpenTelemetry;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
-namespace Cms.ImageService.Api.Extensions;
+namespace Cms.ImageService.Api.Setups;
 
-public static class OtelExtension
+public static class OtelSetup
 {
-    public static void ConfigureOtel(this IServiceCollection services)
+    public static void SetupOpenTelemetry(this IServiceCollection services)
     {
         services
             .AddOpenTelemetry()
-            .WithMetrics(metrics =>
-                metrics
-                    .SetResourceBuilder(
-                        ResourceBuilder.CreateDefault().AddOperatingSystemDetector()
-                    )
-                    .AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
-                    .AddOtlpExporter()
-            )
-            .WithTracing(tracing =>
-                tracing
-                    .SetResourceBuilder(
-                        ResourceBuilder
-                            .CreateDefault()
-                            .AddContainerDetector()
-                            .AddOperatingSystemDetector()
-                    )
-                    .AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources")
-                    .AddSource("Wolverine")
-                    .AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
-                    .AddOtlpExporter()
-            );
+            .SetupMetrics()
+            .SetupTracing();
     }
 
-    public static void ConfigureOtel(this ILoggingBuilder logging)
+    public static void SetupOpenTelemetry(this ILoggingBuilder logging)
     {
         logging.AddOpenTelemetry(options =>
         {
@@ -48,5 +28,41 @@ public static class OtelExtension
                 .SetResourceBuilder(ResourceBuilder.CreateDefault().AddOperatingSystemDetector())
                 .AddOtlpExporter();
         });
+    }
+
+    private static IOpenTelemetryBuilder SetupMetrics(this IOpenTelemetryBuilder builder)
+    {
+        builder
+            .WithMetrics(metrics =>
+                metrics
+                    .SetResourceBuilder(
+                        ResourceBuilder.CreateDefault().AddOperatingSystemDetector()
+                    )
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddOtlpExporter()
+            );
+
+        return builder;
+    }
+
+    private static IOpenTelemetryBuilder SetupTracing(this IOpenTelemetryBuilder builder)
+    {
+        builder
+            .WithTracing(tracing =>
+                tracing
+                    .SetResourceBuilder(
+                        ResourceBuilder
+                            .CreateDefault()
+                            .AddContainerDetector()
+                            .AddOperatingSystemDetector()
+                    )
+                    .AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources")
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddOtlpExporter()
+            );
+        
+        return builder;
     }
 }

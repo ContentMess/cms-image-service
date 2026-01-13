@@ -1,5 +1,5 @@
+using Cms.ImageService.Domain.Constants;
 using Cms.ImageService.Domain.Entities.Base;
-using Cms.Contracts.Constants;
 
 namespace Cms.ImageService.Domain.Entities;
 

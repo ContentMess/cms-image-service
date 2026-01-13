@@ -2,53 +2,29 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Cms.ImageService.Application.Contracts;
-using Cms.ImageService.Application.Services.Interfaces;
+using Cms.ImageService.Application.CommandHandlers.Interfaces;
+using Cms.ImageService.Application.Contracts.Commands;
+using Cms.ImageService.Domain.Constants;
 using Cms.ImageService.Domain.Entities;
 using Cms.ImageService.Infrastructure.Services.Interfaces;
-using Cms.Contracts.Constants;
-using Cms.Contracts;
-using MongoDB.Driver.Linq;
 
-namespace Cms.ImageService.Application.Services;
+namespace Cms.ImageService.Application.CommandHandlers;
 
-internal sealed class ImageService(
+internal sealed class ImageUploadCommandHandler(
     ILocalStorageService localStorageService,
     IExternalStorageService externalStorageService,
     IImageConvertService imageConvertService,
     IDocumentDatabaseService documentDatabaseService
-) : IImageService
+) : IImageUploadCommandHandler
 {
-    public async Task<ImageGetByIdResponse?> GetByIdAsync(
-        ImageGetByIdRequest request,
-        CancellationToken cancellationToken
-    )
-    {
-        var result = await documentDatabaseService
-            .GetQueryable<Image>()
-            .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
-
-        return result is null
-            ? null
-            : new ImageGetByIdResponse(
-                result.Id,
-                result.FileName,
-                result.SizeInBytes,
-                result.Format
-            );
-    }
-
-    public async Task<ImageUploadResponse> UploadAsync(
-        ImageUploadRequest request,
-        CancellationToken cancellationToken
-    )
+    public async Task<ImageUploadCommandResult> HandleAsync(ImageUploadCommand command, CancellationToken cancellationToken)
     {
         string? outputFilePath = null;
 
         try
         {
             outputFilePath = await imageConvertService.ConvertToWebpAsync(
-                request.FileStream,
+                command.FileStream,
                 100,
                 cancellationToken
             );
@@ -66,7 +42,7 @@ internal sealed class ImageService(
 
             await documentDatabaseService.UpsertAsync(image, cancellationToken);
 
-            return new ImageUploadResponse(
+            return new ImageUploadCommandResult(
                 image.Id,
                 image.FileName,
                 image.SizeInBytes,

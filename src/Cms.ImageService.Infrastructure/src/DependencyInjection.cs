@@ -15,11 +15,11 @@ public static class DependencyInjection
 {
     public static void AddInfrastructure(
         this IServiceCollection services,
-        IHealthChecksBuilder healthCheckBuilder,
-        IConfiguration configuration
+        IConfiguration configuration,
+        IHealthChecksBuilder? healthCheckBuilder = null
     )
     {
-        healthCheckBuilder.AddInfrastructureHealthChecks(configuration);
+        healthCheckBuilder?.AddInfrastructureHealthChecks(configuration);
 
         services
             .AddOptions<ExternalStorageConfiguration>()

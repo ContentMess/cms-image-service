@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
-using Cms.ImageService.Api.Extensions;
+using Cms.ImageService.Api.Setups;
 using Cms.ImageService.Application;
+using Cms.ImageService.Infrastructure;
 using Cms.Shared.Setups;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,13 +14,17 @@ public static class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        builder.Logging.ConfigureOtel();
+        builder.Logging.SetupOpenTelemetry();
+        builder.Services.SetupOpenTelemetry();
 
-        builder.Services.ConfigureOtel();
+        builder.Services.AddGrpc();
 
         var healthCheckBuilder = builder.Services.AddHealthChecks();
 
-        builder.Services.AddApplication(healthCheckBuilder, builder.Configuration);
+        builder.Services.AddApplication();
+        builder.Services.AddInfrastructure(builder.Configuration, healthCheckBuilder);
+
+        builder.Services.AddOpenApi();
 
         builder
             .Services.AddControllers(options =>
@@ -34,13 +39,16 @@ public static class Program
                 );
             });
 
-        builder.Services.SetupApiConfiguration(builder.Configuration);
-
-        healthCheckBuilder.ConfigureHealthCheck(builder.Configuration);
-
-        builder.Services.ConfigureWolverine(builder.Configuration);
+        healthCheckBuilder.SetupHealthCheck(builder.Configuration);
 
         using var app = builder.Build();
+
+        app.SetupApplication();
+
+        app.MapOpenApi();
+        app.UseScalar();
+
+        app.UseStaticFiles();
 
         // app.UseExceptionHandler();
         app.UseStatusCodePages();
@@ -50,5 +58,14 @@ public static class Program
         app.MapControllers();
 
         app.Run();
+    }
+
+    private static WebApplication SetupApplication(this WebApplication app)
+    {
+        app.MapGrpcService<Services.ImageService>();
+
+        app.UseHealthCheck();
+
+        return app;
     }
 }

@@ -4,6 +4,10 @@
 			"name": "Cms.ImageService",
 			"path": "."
 		},
+		{
+			"name": "Cms.Protos",
+			"path": "../cms-protos"
+		}
 	],
 	"settings": {
 		"editor.formatOnSave": true,

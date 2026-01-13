@@ -41,6 +41,7 @@ internal sealed class DocumentDatabaseService : IDocumentDatabaseService
 
         _client = new MongoClient(clientSettings);
 
+
         _database = _client.GetDatabase(url.DatabaseName);
         _entityToCollectionNameMap = GetEntityToCollectionNameMap().ToFrozenDictionary();
     }

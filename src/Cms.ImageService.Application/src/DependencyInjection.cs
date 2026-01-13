@@ -1,20 +1,19 @@
-using Cms.ImageService.Application.Services.Interfaces;
-using Cms.ImageService.Infrastructure;
-using Microsoft.Extensions.Configuration;
+using Cms.ImageService.Application.CommandHandlers;
+using Cms.ImageService.Application.CommandHandlers.Interfaces;
+using Cms.ImageService.Application.QueryHandlers;
+using Cms.ImageService.Application.QueryHandlers.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Cms.ImageService.Application;
 
 public static class DependencyInjection
 {
-    public static void AddApplication(
-        this IServiceCollection services,
-        IHealthChecksBuilder healthCheckBuilder,
-        IConfiguration configuration
-    )
+    public static void AddApplication(this IServiceCollection services)
     {
-        services.AddInfrastructure(healthCheckBuilder, configuration);
+        // Command Handlers
+        services.AddSingleton<IImageUploadCommandHandler, ImageUploadCommandHandler>();
 
-        services.AddScoped<IImageService, Services.ImageService>();
+        // Query Handlers
+        services.AddSingleton<IImageGetByIdQueryHandler, ImageGetByIdQueryHandler>();
     }
 }
