@@ -42,7 +42,7 @@ jobs:
             --set configuration.externalStorage.s3ObjectStorage.serviceUrl=${{ secrets.PRODUCTION_S3_SERVICE_URL }} \
             --set configuration.otel.exporterOtlpEndpoint=http://otel-collector-opentelemetry-collector:4317 \
             --set configuration.environment=production \
-            --set spec.template.spec.image=ghcr.io/contentmess/cms-image-service:${{ github.ref_name }}
+            --set spec.template.spec.image=ghcr.io/contentmess/cms-image-service:${{ github.ref_name }} \
             --set metadata.namespace=cms \
             --set spec.replicas=1 \
             --namespace cms \
