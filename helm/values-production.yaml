@@ -5,7 +5,7 @@ spec:
   replicas: 1
   template:
     spec:
-      image: ghcr.io/contentmess/cms-image-service:latest  # Overridden at deploy time
+      image: ghcr.io/contentmess/cms-image-service:latest # Overridden at deploy time
 
 metadata:
   namespace: cms
