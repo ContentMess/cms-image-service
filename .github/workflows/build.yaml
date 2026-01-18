@@ -3,12 +3,23 @@ name: Build Image using Containerfile
 on:
   push:
     tags:
-      - '*'
+      - "*"
 
 jobs:
-  publish_nuget:
+  build-and-publish:
     uses: ContentMess/cms-workflows/.github/workflows/publish-image.yaml@main
     with:
       image_name: cms-image-service
       containerfile_path: api.Dockerfile
-      tags: latest ${{ github.sha }}
+      tags: latest ${{ github.ref_name }}
+  deploy:
+    uses: ContentMess/cms-workflows/.github/workflows/deploy-image.yaml@main
+    needs: build-and-publish
+    with:
+      chart_registry: oci://ghcr.io/contentmess/cms-image-service-chart
+      release_name: cms-image-service
+      namespace: cms
+      cluster_name: content-mess
+    secrets:
+      digitalocean_token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      helm_sets: --set spec.replicas=1 --set configuration.environment=production --set metadata.namespace=cms --set configuration.otel.exporterOtlpEndpoint=http://otel-collector-opentelemetry-collector:4317 --set configuration.connectionStrings.mongoDb=${{ secrets.PRODUCTION_CONNECTION_STRING_MONGODB }} --set configuration.externalStorage.s3ObjectStorage.accessKey=${{ secrets.PRODUCTION_S3_ACCESS_KEY }} --set configuration.externalStorage.s3ObjectStorage.secretKey=${{ secrets.PRODUCTION_S3_SECRET_KEY }} --set configuration.externalStorage.s3ObjectStorage.serviceUrl=${{ secrets.PRODUCTION_S3_SERVICE_URL }} --set configuration.externalStorage.s3ObjectStorage.imageBucketName=images --set configuration.externalStorage.s3ObjectStorage.forcePathStyle=true --set spec.template.spec.image=ghcr.io/contentmess/cms-image-service:${{ github.ref_name }}
