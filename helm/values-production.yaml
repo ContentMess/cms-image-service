@@ -1,0 +1,20 @@
+# Production values for cms-image-service
+# NOTE: Do NOT put secrets here - they are passed via GitHub Secrets
+
+spec:
+  replicas: 1
+  template:
+    spec:
+      image: ghcr.io/contentmess/cms-image-service:latest  # Overridden at deploy time
+
+metadata:
+  namespace: cms
+
+configuration:
+  environment: production
+  otel:
+    exporterOtlpEndpoint: http://otel-collector-opentelemetry-collector:4317
+  externalStorage:
+    s3ObjectStorage:
+      imageBucketName: images
+      forcePathStyle: true
